@@ -76,7 +76,7 @@ useEffect(() => {
       <div>
         <div className="mb-10">
           <p className="text-2xl text-gray-800 font-bold mb-2">
-            Notes is a simple note app made by myself (Jordi Capellades)
+            Motes is a simple note app made by myself (Jordi Capellades)
           </p>
           <p className="text-gray-600 mb-6">
             For made this app I used the following technologies: React,
