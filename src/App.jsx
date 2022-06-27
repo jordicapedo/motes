@@ -56,7 +56,7 @@ useEffect(() => {
       })
       .catch(error => {
         console.log(error)
-        setError('La nota no se pudo crear')
+        setError('The note was not created')
       })
 
     //setNotes(notes.concat(noteToAddToState)) // .push() no crea un aaray nuevo si no mutar el original
@@ -69,55 +69,68 @@ useEffect(() => {
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-center flex-col gap-4 mb-6">
-        <h1 className="text-4xl font-bold">Notes</h1>
-        <button
-          onClick={handleShowAll}
-          className="px-3 py-1 border-[0.2rem] border-black rounded-md"
-        >
-          {showAll ? 'Show only important' : 'Show all'}
-        </button>
+    <div className="flex gap-6 font-sans m-5">
+      <div>
+        <h1 className="text-2xl font-bold mb-2">📓 </h1>
       </div>
-      {loading ? 'Loading...' : ''}
-      <div className="flex items-center justify-center mb-6">
-        <ol>
-          {typeof notes === 'undefined' || notes.length === 0
-            ? 'No tenemos notas de mostrar'
-            : notes
-                .filter(note => {
-                  if (showAll === true) return note
-                  return note.important === true
-                })
-                .map(note => (
-                  <Note
-                    key={note.id}
-                    content={note.content}
-                    important={note.important}
-                  />
-                ))}
-        </ol>
-      </div>
-      <div className="flex items-center justify-center">
-        <form onSubmit={handleSubmit}>
-          <input
-            className="border-[0.2rem] border-black rounded-md px-3 py-1 mr-4 focus:border-black focus:ring-transparent"
-            type="text"
-            onChange={handleChange}
-            value={newNote}
-          />
-          <button className="px-3 py-1 rounded-md border-[0.2rem] border-black mr-4">
-            Crear nota
+      <div>
+        <div className="mb-10">
+          <p className="text-2xl text-gray-800 font-bold mb-2">
+            Notes is a simple note app made by myself (Jordi Capellades)
+          </p>
+          <p className="text-gray-600 mb-6">
+            For made this app I used the following technologies: React,
+            React-Hooks and Tailwindcss.
+          </p>
+          <button
+            onClick={handleShowAll}
+            className="bg-gray-800 text-gray-200 px-4 py-1 rounded-full"
+          >
+            {showAll ? 'Show only important' : 'Show all'}
           </button>
-          <label className="mr-2">Is important?</label>
-          <input
-            className="border-[0.2rem] border-black rounded-md p-3 text-green-300 focus:ring-transparent"
-            type="checkbox"
-            onChange={() => setIsImportant(() => !isImportant)}
-            checked={isImportant}
-          />
-        </form>
-        {error ? <p style={{ color: 'red' }}>{error}</p> : ''}
+        </div>
+        {loading ? 'Loading...' : ''}
+        <div className="mb-10 ml-5">
+          <ul>
+            {typeof notes === 'undefined' || notes.length === 0
+              ? 'No tenemos notas de mostrar'
+              : notes
+                  .filter(note => {
+                    if (showAll === true) return note
+                    return note.important === true
+                  })
+                  .map(note => (
+                    <Note
+                      key={note.id}
+                      content={note.content}
+                      important={note.important}
+                    />
+                  ))}
+          </ul>
+        </div>
+        <div className="">
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <input
+                className="rounded-full border-1 border-gray-800 px-4 py-1 mr-2 mb-4 focus:border-orange-500 focus:ring-transparent"
+                type="text"
+                onChange={handleChange}
+                value={newNote}
+              />
+              <button className="bg-gray-800 text-gray-200 px-4 py-1 rounded-full">
+                Create note
+              </button>
+            </div>
+            <label className="mr-4">Is important?</label>
+            <input
+              className="border-black rounded-md p-2 text-gray-800 focus:ring-transparent"
+              type="checkbox"
+              onChange={() => setIsImportant(() => !isImportant)}
+              checked={isImportant}
+            />
+          </form>
+          {error ? <p style={{ color: 'red' }}>{error}</p> : ''}
+        </div>
       </div>
     </div>
   )

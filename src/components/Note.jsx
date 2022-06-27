@@ -1,10 +1,10 @@
 export const Note = ({ content, important }) => {
   return (
-    <li className="	list-decimal mb-2">
+    <li className="list-decimal mb-2">
       <div className="flex items-center gap-6">
         <p>{content}</p>
         {important ? (
-          <span className="font-bold border-black px-3 py-1 bg-green-300  text-black rounded-md">
+          <span className="rounded-full text-gray-600 bg-gray-300 px-2">
             Important
           </span>
         ) : (
