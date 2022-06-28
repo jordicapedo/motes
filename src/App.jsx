@@ -92,20 +92,22 @@ useEffect(() => {
         {loading ? 'Loading...' : ''}
         <div className="mb-10 ml-5">
           <ul>
-            {typeof notes === 'undefined' || notes.length === 0
-              ? 'No tenemos notas de mostrar'
-              : notes
-                  .filter(note => {
-                    if (showAll === true) return note
-                    return note.important === true
-                  })
-                  .map(note => (
-                    <Note
-                      key={note.id}
-                      content={note.content}
-                      important={note.important}
-                    />
-                  ))}
+            {typeof notes === 'undefined' || notes.length === 0 ? (
+              <li>Nothing to show</li>
+            ) : (
+              notes
+                .filter(note => {
+                  if (showAll === true) return note
+                  return note.important === true
+                })
+                .map(note => (
+                  <Note
+                    key={note.id}
+                    content={note.content}
+                    important={note.important}
+                  />
+                ))
+            )}
           </ul>
         </div>
         <div className="">
