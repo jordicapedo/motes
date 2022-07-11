@@ -1,7 +1,11 @@
 import './main.css'
 import { Note } from './components/Note'
 import { useEffect, useState } from 'react'
-import { getAll as getAllNotes, create as createNote } from './services/notes'
+//import { getAll as getAllNotes, create as createNote } from './services/notes'
+import noteService from './services/notes'
+import loginService from './services/login'
+
+import Notification from './components/Notification'
 
 export default function App() {
   const [notes, setNotes] = useState([])
@@ -10,6 +14,11 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [isImportant, setIsImportant] = useState(false)
+  const [errorMessage, setErrorMessage] = useState(null)
+
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [user, setUser] = useState(null)
 
   // useEffect -> Es como una función que quiero que se
   // ejecute cada vez que se renderiza mi componente
@@ -32,7 +41,7 @@ useEffect(() => {
 
   useEffect(() => {
     setLoading(true)
-    getAllNotes().then(notes => {
+    noteService.getAll().then(notes => {
       setNotes(notes)
       setLoading(false)
     })
@@ -42,15 +51,16 @@ useEffect(() => {
     setNewNote(event.target.value)
   }
 
-  const handleSubmit = event => {
+  const addNote = event => {
     event.preventDefault()
-    const noteToAddToState = {
+    const noteObject = {
       content: newNote,
       important: isImportant
     }
 
     setError('')
-    createNote(noteToAddToState)
+    noteService
+      .create(noteObject)
       .then(newNote => {
         setNotes(prevNotes => prevNotes.concat(newNote))
       })
@@ -68,6 +78,74 @@ useEffect(() => {
     setShowAll(() => !showAll)
   }
 
+  const handleLogin = async event => {
+    event.preventDefault()
+
+    try {
+      const user = await loginService.login({ username, password })
+      console.log(user)
+
+      noteService.setToken(user.token)
+
+      setUser(user)
+      setUsername('')
+      setPassword('')
+    } catch (error) {
+      console.log(error)
+      setErrorMessage('Wrong credentials')
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    }
+  }
+
+  const renderLoginForm = () => (
+    <form className="mb-4" onSubmit={handleLogin}>
+      <input
+        className="rounded-full px-4 py-1 mr-2"
+        type="text"
+        value={username}
+        placeholder="Username"
+        onChange={({ target }) => setUsername(target.value)}
+      />
+      <input
+        className="rounded-full px-4 py-1 mr-2"
+        type="password"
+        value={password}
+        placeholder="Password"
+        onChange={({ target }) => setPassword(target.value)}
+      />
+      <button className="bg-gray-800 text-gray-200 px-4 py-1 mr-2 rounded-full">
+        Login
+      </button>
+      <Notification message={errorMessage} />
+    </form>
+  )
+
+  const renderCreateNoteForm = () => (
+    <form onSubmit={addNote} className="mb-4">
+      <div className="mb-2">
+        <input
+          className="rounded-full border-1 border-gray-800 px-4 py-1 mr-2 mb-4 focus:border-orange-500 focus:ring-transparent"
+          type="text"
+          onChange={handleChange}
+          value={newNote}
+        />
+        <button className="bg-gray-800 text-gray-200 px-4 py-1 rounded-full">
+          Create note
+        </button>
+      </div>
+      <label className="mr-4">Is important?</label>
+      <input
+        className="border-black rounded-md p-2 text-gray-800 focus:ring-transparent"
+        type="checkbox"
+        onChange={() => setIsImportant(() => !isImportant)}
+        checked={isImportant}
+      />
+      {error ? <p style={{ color: 'red' }}>{error}</p> : ''}
+    </form>
+  )
+
   return (
     <div className="flex gap-6 font-sans m-5">
       <div>
@@ -82,6 +160,9 @@ useEffect(() => {
             For made this app I used the following technologies: React,
             React-Hooks and Tailwindcss.
           </p>
+
+          {user ? renderCreateNoteForm() : renderLoginForm()}
+
           <button
             onClick={handleShowAll}
             className="bg-gray-800 text-gray-200 px-4 py-1 rounded-full"
@@ -109,29 +190,6 @@ useEffect(() => {
                 ))
             )}
           </ul>
-        </div>
-        <div className="">
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <input
-                className="rounded-full border-1 border-gray-800 px-4 py-1 mr-2 mb-4 focus:border-orange-500 focus:ring-transparent"
-                type="text"
-                onChange={handleChange}
-                value={newNote}
-              />
-              <button className="bg-gray-800 text-gray-200 px-4 py-1 rounded-full">
-                Create note
-              </button>
-            </div>
-            <label className="mr-4">Is important?</label>
-            <input
-              className="border-black rounded-md p-2 text-gray-800 focus:ring-transparent"
-              type="checkbox"
-              onChange={() => setIsImportant(() => !isImportant)}
-              checked={isImportant}
-            />
-          </form>
-          {error ? <p style={{ color: 'red' }}>{error}</p> : ''}
         </div>
       </div>
     </div>
