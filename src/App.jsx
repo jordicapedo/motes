@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react'
 import noteService from './services/notes'
 import loginService from './services/login'
 
-import Notification from './components/Notification'
+import LoginForm from './components/LoginForm'
+import Togglabe from './components/Togglabe'
 
 export default function App() {
   const [notes, setNotes] = useState([])
@@ -47,6 +48,21 @@ useEffect(() => {
     })
   }, [])
 
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      noteService.setToken(user.token)
+    }
+  }, [])
+
+  const handleLogout = () => {
+    setUser(null)
+    noteService.setToken(user.token)
+    window.localStorage.removeItem('loggedNoteappUser')
+  }
+
   const handleChange = event => {
     setNewNote(event.target.value)
   }
@@ -85,6 +101,8 @@ useEffect(() => {
       const user = await loginService.login({ username, password })
       console.log(user)
 
+      window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user))
+
       noteService.setToken(user.token)
 
       setUser(user)
@@ -99,29 +117,6 @@ useEffect(() => {
     }
   }
 
-  const renderLoginForm = () => (
-    <form className="mb-4" onSubmit={handleLogin}>
-      <input
-        className="rounded-full px-4 py-1 mr-2"
-        type="text"
-        value={username}
-        placeholder="Username"
-        onChange={({ target }) => setUsername(target.value)}
-      />
-      <input
-        className="rounded-full px-4 py-1 mr-2"
-        type="password"
-        value={password}
-        placeholder="Password"
-        onChange={({ target }) => setPassword(target.value)}
-      />
-      <button className="bg-gray-800 text-gray-200 px-4 py-1 mr-2 rounded-full">
-        Login
-      </button>
-      <Notification message={errorMessage} />
-    </form>
-  )
-
   const renderCreateNoteForm = () => (
     <form onSubmit={addNote} className="mb-4">
       <div className="mb-2">
@@ -131,8 +126,14 @@ useEffect(() => {
           onChange={handleChange}
           value={newNote}
         />
-        <button className="bg-gray-800 text-gray-200 px-4 py-1 rounded-full">
+        <button className="bg-gray-800 text-gray-200 px-4 py-1 rounded-full mr-2">
           Create note
+        </button>
+        <button
+          onClick={handleLogout}
+          className="bg-gray-800 text-gray-200 px-4 py-1 rounded-full"
+        >
+          Logout
         </button>
       </div>
       <label className="mr-4">Is important?</label>
@@ -161,7 +162,20 @@ useEffect(() => {
             React-Hooks and Tailwindcss.
           </p>
 
-          {user ? renderCreateNoteForm() : renderLoginForm()}
+          <Togglabe>children</Togglabe>
+
+          {user ? (
+            renderCreateNoteForm()
+          ) : (
+            <LoginForm
+              username={username}
+              password={password}
+              handleUsernameChange={({ target }) => setUsername(target.value)}
+              handlePasswordChange={({ target }) => setPassword(target.value)}
+              handleSubmit={handleLogin}
+              errorMessage={errorMessage}
+            />
+          )}
 
           <button
             onClick={handleShowAll}
