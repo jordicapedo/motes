@@ -1,44 +1,24 @@
 import './main.css'
 import { Note } from './components/Note'
 import { useEffect, useState } from 'react'
-//import { getAll as getAllNotes, create as createNote } from './services/notes'
+
 import noteService from './services/notes'
 import loginService from './services/login'
 
 import LoginForm from './components/LoginForm'
-import Togglabe from './components/Togglabe'
+import NoteForm from './components/NoteForm'
 
 export default function App() {
   const [notes, setNotes] = useState([])
-  const [newNote, setNewNote] = useState('')
+
   const [showAll, setShowAll] = useState(true)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [isImportant, setIsImportant] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
 
-  // useEffect -> Es como una función que quiero que se
-  // ejecute cada vez que se renderiza mi componente
+  // useEffect -> Es como una función que quiero que se ejecute cada vez que se renderiza mi componente
   // fectch -> Es una función que me permite hacer una petición a una API
-  {
-    /*
-useEffect(() => {
-    setTimeout(() => {
-      setLoading(true)
-      fetch('https://jsonplaceholder.typicode.com/posts')
-        .then(response => response.json())
-        .then(json => {
-          setNotes(json)
-          setLoading(false)
-        })
-    }, 2000)
-  }, []) -> El segundo parámetro es un array vacío, porque no quiero que se ejecute 1 vez cuando se renderiza el componente
-*/
-  }
 
   useEffect(() => {
     setLoading(true)
@@ -63,89 +43,27 @@ useEffect(() => {
     window.localStorage.removeItem('loggedNoteappUser')
   }
 
-  const handleChange = event => {
-    setNewNote(event.target.value)
-  }
-
-  const addNote = event => {
-    event.preventDefault()
-    const noteObject = {
-      content: newNote,
-      important: isImportant
-    }
-
-    setError('')
+  const addNote = noteObject => {
     noteService
       .create(noteObject)
-      .then(newNote => {
-        setNotes(prevNotes => prevNotes.concat(newNote))
+      .then(returnedNote => {
+        setNotes(notes.concat(returnedNote))
       })
       .catch(error => {
         console.log(error)
-        setError('The note was not created')
+        setErrorMessage('The note was not created')
       })
 
     //setNotes(notes.concat(noteToAddToState)) // .push() no crea un aaray nuevo si no mutar el original
-    setNewNote('')
-    setIsImportant(false)
   }
 
   const handleShowAll = () => {
     setShowAll(() => !showAll)
   }
 
-  const handleLogin = async event => {
-    event.preventDefault()
-
-    try {
-      const user = await loginService.login({ username, password })
-      console.log(user)
-
-      window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user))
-
-      noteService.setToken(user.token)
-
-      setUser(user)
-      setUsername('')
-      setPassword('')
-    } catch (error) {
-      console.log(error)
-      setErrorMessage('Wrong credentials')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
-    }
+  const handleLogin = user => {
+    setUser(user)
   }
-
-  const renderCreateNoteForm = () => (
-    <form onSubmit={addNote} className="mb-4">
-      <div className="mb-2">
-        <input
-          className="rounded-full border-1 border-gray-800 px-4 py-1 mr-2 mb-4 focus:border-orange-500 focus:ring-transparent"
-          type="text"
-          onChange={handleChange}
-          value={newNote}
-        />
-        <button className="bg-gray-800 text-gray-200 px-4 py-1 rounded-full mr-2">
-          Create note
-        </button>
-        <button
-          onClick={handleLogout}
-          className="bg-gray-800 text-gray-200 px-4 py-1 rounded-full"
-        >
-          Logout
-        </button>
-      </div>
-      <label className="mr-4">Is important?</label>
-      <input
-        className="border-black rounded-md p-2 text-gray-800 focus:ring-transparent"
-        type="checkbox"
-        onChange={() => setIsImportant(() => !isImportant)}
-        checked={isImportant}
-      />
-      {error ? <p style={{ color: 'red' }}>{error}</p> : ''}
-    </form>
-  )
 
   return (
     <div className="flex gap-6 font-sans m-5">
@@ -162,19 +80,10 @@ useEffect(() => {
             React-Hooks and Tailwindcss.
           </p>
 
-          <Togglabe>children</Togglabe>
-
           {user ? (
-            renderCreateNoteForm()
+            <NoteForm addNote={addNote} handleLogout={handleLogout} />
           ) : (
-            <LoginForm
-              username={username}
-              password={password}
-              handleUsernameChange={({ target }) => setUsername(target.value)}
-              handlePasswordChange={({ target }) => setPassword(target.value)}
-              handleSubmit={handleLogin}
-              errorMessage={errorMessage}
-            />
+            <LoginForm handleLogin={handleLogin} />
           )}
 
           <button
